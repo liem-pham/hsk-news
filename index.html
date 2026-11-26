@@ -1,0 +1,1090 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Đọc báo tiếng Trung HSK</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #fdfcf9;
+        --surface: #ffffff;
+        --text: #1a1714;
+        --dim: #6f6a61;
+        --border: #e7e1d6;
+        --accent: #b3352b;
+        --accent-soft: rgba(179, 53, 43, 0.09);
+        --gold: #a97b2f;
+        --radius: 12px;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #17140f;
+          --surface: #211d17;
+          --text: #f2ede4;
+          --dim: #a89f92;
+          --border: #38312a;
+          --accent: #e0655a;
+          --accent-soft: rgba(224, 101, 90, 0.16);
+          --gold: #d9a84e;
+        }
+      }
+      * { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+      }
+      .font-zh { font-family: "Noto Serif SC", "Songti SC", "SimSun", serif; }
+      button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]) { min-height: 2.25rem; }
+      button { font-family: inherit; cursor: pointer; background: none; border: none; color: inherit; }
+      a { color: var(--accent); }
+      .wrap { max-width: 44rem; margin: 0 auto; padding: 0 1rem calc(2.5rem + env(safe-area-inset-bottom)); }
+
+      /* ---------- top bar ---------- */
+      .topbar {
+        display: flex; align-items: center; gap: .5rem;
+        padding: .9rem 0 .4rem;
+      }
+      .topbar .brand { font-size: 13px; font-weight: 600; letter-spacing: .02em; color: var(--dim); }
+      .topbar .brand b { color: var(--accent); font-weight: 700; }
+      .topbar .spacer { flex: 1; }
+      .pill-btn {
+        display: inline-flex; align-items: center; gap: .35rem;
+        padding: .45rem .8rem; border: 1px solid var(--border); border-radius: 999px;
+        font-size: 13px; font-weight: 600; color: var(--text); background: var(--surface);
+        min-height: 2.25rem;
+      }
+      .pill-btn:active { background: var(--accent-soft); }
+
+      /* ---------- home list ---------- */
+      .home-head { padding: .6rem 0 .2rem; }
+      .home-head h1 { font-size: 24px; line-height: 1.25; margin: 0; font-weight: 700; }
+      .home-head p { margin: .35rem 0 0; font-size: 13px; color: var(--dim); }
+      .article-list { list-style: none; margin: .6rem 0 0; padding: 0; }
+      .article-item { border-bottom: 1px solid var(--border); }
+      .article-link {
+        display: block; width: 100%; text-align: left; padding: 1rem .1rem;
+        min-height: 2.25rem;
+      }
+      .article-link:active { background: var(--accent-soft); }
+      .meta-row { display: flex; align-items: center; gap: .5rem; font-size: 12px; color: var(--dim); flex-wrap: wrap; }
+      .chip {
+        display: inline-block; padding: 2px 8px; border-radius: 999px;
+        background: var(--accent); color: #fff; font-size: 11px; font-weight: 600;
+      }
+      .chip.cached { background: var(--gold); }
+      .article-title-zh { display: block; margin-top: .45rem; font-size: 21px; line-height: 1.5; font-weight: 700; color: var(--text); }
+      .article-title-vi { display: block; margin-top: .3rem; font-size: 14px; line-height: 1.55; color: var(--dim); }
+
+      .state-box { padding: 2.2rem 0; text-align: center; color: var(--dim); font-size: 14px; line-height: 1.6; }
+      .state-box .retry {
+        margin-top: 1rem; padding: .6rem 1.4rem; border-radius: 999px;
+        border: 1px solid var(--accent); color: var(--accent); font-weight: 600; font-size: 14px;
+      }
+      .skel { padding: 1rem 0; border-bottom: 1px solid var(--border); }
+      .skel div { height: 14px; border-radius: 6px; background: var(--border); opacity: .55; margin-bottom: 10px; }
+      .skel div:last-child { margin-bottom: 0; }
+
+      /* ---------- reader toolbar ---------- */
+      .reader-bar {
+        position: sticky; top: 0; z-index: 20;
+        background: color-mix(in srgb, var(--bg) 92%, transparent);
+        backdrop-filter: blur(8px);
+        display: flex; align-items: center; gap: .5rem;
+        padding: .55rem 0; margin: 0 -.2rem;
+      }
+      .back-btn { font-size: 14px; font-weight: 600; color: var(--accent); padding: .45rem .4rem; }
+      .toggle-group { margin-left: auto; display: flex; gap: .4rem; }
+      .toggle-btn {
+        padding: .45rem .75rem; border-radius: 999px; font-size: 13px; font-weight: 600;
+        border: 1px solid var(--border); color: var(--dim); background: var(--surface);
+      }
+      .toggle-btn[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+      /* ---------- tokens ---------- */
+      .tokens { display: flex; flex-wrap: wrap; }
+      .tokens.with-vi { align-items: flex-start; row-gap: .5rem; }
+      .tokens.no-vi { align-items: flex-end; }
+      .tok {
+        display: flex; flex-direction: column; align-items: center;
+        padding: 1px; border-radius: 4px; text-align: center;
+        min-height: 0;
+      }
+      .tok.speaking { background: var(--accent-soft); }
+      .tok.active { background: var(--accent); color: #fff; }
+      .tok .py { line-height: 1.25; color: var(--gold); font-weight: 500; }
+      .tok.active .py { color: rgba(255,255,255,.85); }
+      .tok .hz { color: var(--text); text-decoration: underline dotted; text-underline-offset: 5px; text-decoration-color: color-mix(in srgb, var(--dim) 45%, transparent); }
+      .tok.active .hz { color: #fff; text-decoration-color: rgba(255,255,255,.6); }
+      .tok .vi { margin-top: 3px; line-height: 1.35; text-align: center; font-weight: 500; color: var(--dim); }
+      .tok.active .vi { color: rgba(255,255,255,.85); }
+      .tok-punct { display: flex; flex-direction: column; align-items: center; border-radius: 4px; }
+      .tok-punct.speaking { background: var(--accent-soft); }
+      .tok-punct .py-spacer { line-height: 1.25; visibility: hidden; }
+      .title-tokens .hz { font-size: 29px; line-height: 1.45; font-weight: 700; }
+      .title-tokens .py { font-size: 11px; }
+      .title-tokens .vi { font-size: 12px; max-width: 9rem; }
+      .body-tokens .hz { font-size: 21px; line-height: 1.6; }
+      .body-tokens .py { font-size: 10px; }
+      .body-tokens .vi { font-size: 11px; max-width: 7rem; }
+      .para { margin: 0 0 1.15rem; }
+
+      /* ---------- player ---------- */
+      .player {
+        margin-top: 1rem; border: 1px solid var(--border); border-radius: var(--radius);
+        background: var(--surface); padding: .8rem .9rem;
+      }
+      .player-row { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+      .play-btn {
+        padding: .6rem 1.2rem; border-radius: 999px; background: var(--accent); color: #fff;
+        font-size: 14px; font-weight: 600;
+      }
+      .play-btn:disabled { opacity: .6; }
+      .stop-btn {
+        padding: .6rem 1rem; border-radius: 999px; border: 1px solid var(--border);
+        color: var(--dim); font-size: 14px; font-weight: 600;
+      }
+      .rates { margin-left: auto; display: flex; gap: .35rem; }
+      .rate-btn {
+        padding: .4rem .6rem; border-radius: 999px; font-size: 12px; font-weight: 600;
+        border: 1px solid var(--border); color: var(--dim); min-height: 2rem;
+      }
+      .rate-btn[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+      .player-note { margin: .55rem 0 0; font-size: 12px; line-height: 1.55; color: var(--dim); }
+      .player-note.warn { color: var(--accent); font-weight: 500; }
+
+      /* ---------- sections under article ---------- */
+      .full-btn {
+        width: 100%; padding: .8rem; border-radius: var(--radius);
+        border: 1px solid var(--accent); color: var(--accent); font-weight: 600; font-size: 14px;
+      }
+      .translation { margin-top: 1rem; }
+      .translation .t-title { font-size: 17px; font-weight: 700; line-height: 1.45; margin: 0; }
+      .translation p { font-size: 15px; line-height: 1.7; margin: 0 0 1rem; }
+      .section-divider { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+      .source-line { font-size: 12px; color: var(--dim); margin: 0 0 .3rem; }
+      .source-link { font-size: 15px; text-decoration: underline; text-underline-offset: 2px; word-break: break-word; }
+
+      .gen-card { margin-top: 2rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+      .gen-head { display: flex; width: 100%; align-items: center; gap: .8rem; padding: .8rem 1rem; text-align: left; }
+      .gen-head .t { flex: 1; font-size: 14px; font-weight: 600; }
+      .gen-head .total { font-size: 12px; color: var(--dim); }
+      .gen-head .chev { color: var(--dim); transition: transform .2s; }
+      .gen-head .chev.open { transform: rotate(180deg); }
+      .gen-body { border-top: 1px solid var(--border); padding: 1rem; }
+      .gen-body dl { margin: 0; }
+      .gen-row { display: flex; justify-content: space-between; gap: 1rem; font-size: 14px; padding: .15rem 0; }
+      .gen-row dt { color: var(--dim); }
+      .gen-row dd { margin: 0; font-weight: 500; text-align: right; }
+      .gen-steps { list-style: none; margin: 1rem 0 0; padding: 1rem 0 0; border-top: 1px solid var(--border); }
+      .gen-steps li { display: flex; gap: .8rem; padding: .3rem 0; }
+      .gen-steps .s-main { flex: 1; min-width: 0; }
+      .gen-steps .s-label { display: block; font-size: 14px; font-weight: 500; line-height: 1.4; }
+      .gen-steps .s-time { display: block; font-size: 12px; color: var(--dim); margin-top: 1px; }
+      .gen-steps .s-dur { font-size: 12px; color: var(--dim); padding-top: 2px; white-space: nowrap; }
+      .gen-empty { font-size: 14px; line-height: 1.65; color: var(--dim); margin: 0; }
+
+      /* ---------- word sheet ---------- */
+      .sheet-root { position: fixed; inset: 0; z-index: 50; }
+      .sheet-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.35); width: 100%; height: 100%; }
+      .sheet {
+        position: absolute; left: 0; right: 0; bottom: 0;
+        background: var(--surface); border-top: 1px solid var(--border);
+        border-radius: 16px 16px 0 0; padding: 1rem 1.25rem calc(1rem + env(safe-area-inset-bottom));
+        box-shadow: 0 -8px 30px rgba(0,0,0,.18);
+        max-width: 44rem; margin: 0 auto;
+      }
+      .sheet-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+      .sheet-kind { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--dim); }
+      .sheet-word { margin-top: .25rem; font-size: 40px; line-height: 1.1; font-weight: 700; }
+      .sheet-py { margin-top: .45rem; font-size: 18px; color: var(--gold); font-weight: 500; }
+      .sheet-close {
+        width: 2.25rem; height: 2.25rem; border-radius: 999px; border: 1px solid var(--border);
+        color: var(--dim); font-size: 18px; line-height: 1; flex-shrink: 0;
+      }
+      .sheet dl { margin: 1rem 0 0; }
+      .sheet .row { display: flex; gap: .8rem; padding: .3rem 0; }
+      .sheet dt { width: 5.2rem; flex-shrink: 0; font-size: 14px; color: var(--dim); padding-top: 1px; }
+      .sheet dd { margin: 0; font-size: 16px; font-weight: 500; }
+      .sheet .save-btn {
+        width: 100%; margin-top: 1.2rem; padding: .8rem; border-radius: var(--radius);
+        background: var(--accent); color: #fff; font-weight: 600; font-size: 14px;
+      }
+      .sheet .save-btn.saved { background: var(--surface); border: 1px solid var(--accent); color: var(--accent); }
+      .sheet .save-btn:disabled { opacity: .4; }
+      .sheet .no-gloss { margin-top: 1rem; font-size: 14px; line-height: 1.6; color: var(--dim); }
+
+      /* ---------- saved view ---------- */
+      .saved-list { list-style: none; margin: .5rem 0 0; padding: 0; }
+      .saved-item { display: flex; align-items: flex-start; gap: .8rem; padding: .8rem 0; border-bottom: 1px solid var(--border); }
+      .saved-item .main { flex: 1; min-width: 0; }
+      .saved-item .w-row { display: flex; align-items: baseline; gap: .6rem; flex-wrap: wrap; }
+      .saved-item .w { font-size: 22px; font-weight: 700; }
+      .saved-item .p { font-size: 14px; color: var(--gold); }
+      .saved-item .v { margin-top: .2rem; font-size: 14px; }
+      .saved-item .h { font-size: 12px; color: var(--dim); }
+      .saved-del {
+        width: 2.25rem; height: 2.25rem; border-radius: 999px; border: 1px solid var(--border);
+        color: var(--dim); font-size: 16px; line-height: 1; flex-shrink: 0;
+      }
+      .view-title { font-size: 20px; font-weight: 700; margin: .8rem 0 0; }
+      .empty-note { margin-top: 1.5rem; font-size: 14px; line-height: 1.65; color: var(--dim); }
+      [hidden] { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <!-- HOME -->
+      <section id="view-home">
+        <div class="topbar">
+          <span class="brand">Đọc báo tiếng Trung · <b>HSK 4</b></span>
+          <span class="spacer"></span>
+          <button type="button" class="pill-btn" id="btn-saved-home">Từ đã lưu (<span id="saved-count">0</span>)</button>
+        </div>
+        <div class="home-head">
+          <h1>Bài đọc mới nhất</h1>
+          <p id="home-sub">Tin từ 中新网, viết lại theo trình độ HSK 4. Bấm vào một bài để đọc.</p>
+        </div>
+        <div id="home-loading">
+          <div class="skel"><div style="width:35%"></div><div style="width:92%"></div><div style="width:70%"></div></div>
+          <div class="skel"><div style="width:35%"></div><div style="width:88%"></div><div style="width:64%"></div></div>
+          <div class="skel"><div style="width:35%"></div><div style="width:95%"></div><div style="width:72%"></div></div>
+        </div>
+        <div id="home-error" class="state-box" hidden>
+          <p id="home-error-text">Không tải được danh sách bài. Kiểm tra mạng rồi thử lại.</p>
+          <button type="button" class="retry" id="btn-retry-list">Thử lại</button>
+        </div>
+        <ul class="article-list" id="article-list"></ul>
+      </section>
+
+      <!-- READER -->
+      <section id="view-reader" hidden>
+        <div class="reader-bar">
+          <button type="button" class="back-btn" id="btn-back">← Tất cả bài</button>
+          <span class="toggle-group">
+            <button type="button" class="toggle-btn" id="toggle-pinyin" aria-pressed="true">Pinyin</button>
+            <button type="button" class="toggle-btn" id="toggle-vi" aria-pressed="false">Nghĩa</button>
+          </span>
+        </div>
+        <div id="reader-loading" class="state-box">Đang tải bài…</div>
+        <div id="reader-error" class="state-box" hidden>
+          <p>Không tải được bài này. Kiểm tra mạng rồi thử lại.</p>
+          <button type="button" class="retry" id="btn-retry-article">Thử lại</button>
+        </div>
+        <article id="reader-body" hidden>
+          <div class="meta-row" style="margin-top:.6rem">
+            <span class="chip" id="r-category"></span>
+            <span id="r-source"></span>
+          </div>
+
+          <div class="player">
+            <div class="player-row">
+              <button type="button" class="play-btn" id="btn-play" disabled>▶ Nghe đọc bài</button>
+              <button type="button" class="stop-btn" id="btn-stop" hidden>■ Dừng</button>
+              <span class="rates" id="rates">
+                <button type="button" class="rate-btn" data-rate="0.75" aria-pressed="false">0.75×</button>
+                <button type="button" class="rate-btn" data-rate="1" aria-pressed="true">1×</button>
+                <button type="button" class="rate-btn" data-rate="1.25" aria-pressed="false">1.25×</button>
+              </span>
+            </div>
+            <p class="player-note" id="player-note">Đang chuẩn bị giọng đọc…</p>
+          </div>
+
+          <h1 style="margin:1rem 0 0"><span id="r-title"></span></h1>
+          <div id="r-paragraphs" style="margin-top:1.1rem"></div>
+
+          <div class="section-divider">
+            <button type="button" class="full-btn" id="btn-full" aria-expanded="false">Xem bản dịch toàn bài (tiếng Việt)</button>
+            <div class="translation" id="r-translation" hidden></div>
+          </div>
+
+          <div class="section-divider">
+            <p class="source-line">Bài gốc trên <span id="r-source-name"></span>:</p>
+            <a class="source-link font-zh" id="r-source-link" href="#" target="_blank" rel="noreferrer"></a>
+          </div>
+
+          <div class="gen-card">
+            <button type="button" class="gen-head" id="gen-head" aria-expanded="false">
+              <span class="t">Thời gian tạo bài</span>
+              <span class="total" id="gen-total"></span>
+              <span class="chev" id="gen-chev" aria-hidden="true">▾</span>
+            </button>
+            <div class="gen-body" id="gen-body" hidden></div>
+          </div>
+
+          <div style="margin-top:1.6rem">
+            <button type="button" class="pill-btn" id="btn-saved-reader">Xem từ đã lưu</button>
+          </div>
+        </article>
+      </section>
+
+      <!-- SAVED -->
+      <section id="view-saved" hidden>
+        <div class="reader-bar">
+          <button type="button" class="back-btn" id="btn-back-saved">← Tất cả bài</button>
+        </div>
+        <h2 class="view-title">Từ đã lưu (<span id="saved-count-2">0</span>)</h2>
+        <p class="empty-note" id="saved-empty">Chưa có từ nào. Khi đọc bài, bấm vào một cụm từ rồi chọn “Lưu cụm từ này” để ôn lại ở đây. Từ đã lưu chỉ nằm trên thiết bị này.</p>
+        <ul class="saved-list" id="saved-list"></ul>
+      </section>
+    </div>
+
+    <!-- WORD SHEET -->
+    <div class="sheet-root" id="sheet-root" hidden>
+      <button type="button" class="sheet-backdrop" id="sheet-backdrop" aria-label="Đóng bảng tra từ"></button>
+      <div class="sheet" role="dialog" aria-modal="true" id="sheet-box">
+        <div class="sheet-top">
+          <div>
+            <div class="sheet-kind" id="sheet-kind">Cụm từ</div>
+            <div class="sheet-word font-zh" id="sheet-word"></div>
+            <div class="sheet-py" id="sheet-py"></div>
+          </div>
+          <button type="button" class="sheet-close" id="sheet-close" aria-label="Đóng">×</button>
+        </div>
+        <div id="sheet-gloss">
+          <dl>
+            <div class="row"><dt>Nghĩa Việt</dt><dd id="sheet-vi"></dd></div>
+            <div class="row"><dt>Hán-Việt</dt><dd id="sheet-hv"></dd></div>
+          </dl>
+        </div>
+        <p class="no-gloss" id="sheet-nogloss" hidden>Cụm này chưa có chú giải sẵn trong bài.</p>
+        <button type="button" class="save-btn" id="sheet-save">Lưu cụm từ này</button>
+      </div>
+    </div>
+
+    <script>
+    (function () {
+      "use strict";
+
+      var SUPABASE_URL = "https://ewqcpwfwwamfzozosrmx.supabase.co";
+      var SUPABASE_KEY = "sb_publishable_41EITPL1xwK1bKhoDcXbDQ_Fi5hv3K9";
+      var LS_SAVED = "docbao_public_saved_words_v1";
+      var LS_LIST = "docbao_public_list_v1";
+      var LS_ARTICLE_PREFIX = "docbao_public_article_";
+      var LS_AUDIO_PREFIX = "docbao_public_audio_";
+
+      function $(id) { return document.getElementById(id); }
+      function el(tag, cls, text) {
+        var e = document.createElement(tag);
+        if (cls) e.className = cls;
+        if (text != null) e.textContent = text;
+        return e;
+      }
+      function lsGet(key) {
+        try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : null; }
+        catch (e) { return null; }
+      }
+      function lsSet(key, val) {
+        try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) { /* full/blocked: cache is best-effort */ }
+      }
+      function lsDel(key) { try { localStorage.removeItem(key); } catch (e) {} }
+
+      function sbFetch(path) {
+        return fetch(SUPABASE_URL + path, {
+          headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY }
+        }).then(function (res) {
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          return res.json();
+        });
+      }
+
+      /* ---------------- formatting helpers (mirror of the webapp) ---------------- */
+      function parseDateStr(s) {
+        var p = String(s || "").split("-").map(Number);
+        return new Date(p[0] || 1970, (p[1] || 1) - 1, p[2] || 1);
+      }
+      function formatDateShort(s) {
+        var today = new Date();
+        var t = today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, "0") + "-" + String(today.getDate()).padStart(2, "0");
+        if (s === t) return "Hôm nay";
+        return new Intl.DateTimeFormat("vi-VN", { day: "numeric", month: "numeric", year: "numeric" }).format(parseDateStr(s));
+      }
+      function formatPub(iso) {
+        if (!iso) return "";
+        var d = new Date(iso);
+        if (isNaN(d.getTime())) return "";
+        return new Intl.DateTimeFormat("vi-VN", { hour: "2-digit", minute: "2-digit", day: "numeric", month: "numeric", timeZone: "Asia/Ho_Chi_Minh" }).format(d);
+      }
+      function formatDuration(ms) {
+        var totalSec = Math.max(0, Math.round(ms / 1000));
+        if (totalSec < 5) return "vài giây";
+        if (totalSec < 60) return totalSec + " giây";
+        var min = Math.floor(totalSec / 60), sec = totalSec % 60;
+        if (min < 60) return sec > 0 ? min + " phút " + sec + " giây" : min + " phút";
+        var h = Math.floor(min / 60), m = min % 60;
+        return m > 0 ? h + " giờ " + m + " phút" : h + " giờ";
+      }
+      function formatClock(ms) {
+        return new Intl.DateTimeFormat("vi-VN", { hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23", timeZone: "Asia/Ho_Chi_Minh" }).format(new Date(ms));
+      }
+      function formatDateTimeFull(ms) {
+        return new Intl.DateTimeFormat("vi-VN", { hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23", day: "numeric", month: "numeric", year: "numeric", timeZone: "Asia/Ho_Chi_Minh" }).format(new Date(ms));
+      }
+
+      /* ---------------- saved words (this device only) ---------------- */
+      function getSaved() { return lsGet(LS_SAVED) || []; }
+      function setSaved(words) { lsSet(LS_SAVED, words); renderSavedCounts(); }
+      function isSaved(word) { return getSaved().some(function (s) { return s.word === word; }); }
+      function saveWord(w) {
+        var words = getSaved();
+        if (!words.some(function (s) { return s.word === w.word; })) { words.unshift(w); setSaved(words); }
+      }
+      function removeWord(word) { setSaved(getSaved().filter(function (s) { return s.word !== word; })); }
+      function renderSavedCounts() {
+        var n = getSaved().length;
+        $("saved-count").textContent = n;
+        $("saved-count-2").textContent = n;
+      }
+
+      /* ---------------- views / routing ---------------- */
+      var views = { home: $("view-home"), reader: $("view-reader"), saved: $("view-saved") };
+      function showView(name) {
+        Object.keys(views).forEach(function (k) { views[k].hidden = k !== name; });
+        window.scrollTo(0, 0);
+      }
+      var currentArticleId = null;
+
+      function route() {
+        var hash = location.hash || "#/";
+        var m = hash.match(/^#\/article\/(\d+)$/);
+        stopSpeech();
+        closeSheet();
+        if (m) {
+          showView("reader");
+          openArticle(parseInt(m[1], 10));
+        } else if (hash === "#/saved") {
+          showView("saved");
+          renderSaved();
+        } else {
+          showView("home");
+        }
+      }
+      window.addEventListener("hashchange", route);
+
+      /* ---------------- home list ---------------- */
+      function renderList(articles, fromCache) {
+        var ul = $("article-list");
+        ul.innerHTML = "";
+        articles.forEach(function (a) {
+          var li = el("li", "article-item");
+          var btn = el("button", "article-link");
+          btn.type = "button";
+          btn.setAttribute("aria-label", "Đọc bài: " + (a.title_text || ""));
+          var meta = el("span", "meta-row");
+          meta.appendChild(el("span", "chip", a.category || ""));
+          var d = el("span", null, formatDateShort(a.date));
+          meta.appendChild(d);
+          if (a.source_name) meta.appendChild(el("span", null, "· " + a.source_name));
+          if (fromCache) meta.appendChild(el("span", "chip cached", "Đã lưu trên máy"));
+          btn.appendChild(meta);
+          btn.appendChild(el("span", "article-title-zh font-zh", a.title_text || ""));
+          if (a.translation_title_vi) btn.appendChild(el("span", "article-title-vi", a.translation_title_vi));
+          btn.addEventListener("click", function () { location.hash = "#/article/" + a.id; });
+          li.appendChild(btn);
+          ul.appendChild(li);
+        });
+        $("home-sub").textContent = articles.length + " bài · Tin từ 中新网, viết lại theo trình độ HSK 4. Bấm vào một bài để đọc.";
+      }
+
+      function loadList() {
+        $("home-loading").hidden = false;
+        $("home-error").hidden = true;
+        sbFetch("/rest/v1/articles?select=id,title_text,translation_title_vi,category,date,created_at_ms,source_name&order=id.desc&limit=100")
+          .then(function (rows) {
+            $("home-loading").hidden = true;
+            lsSet(LS_LIST, rows);
+            renderList(rows, false);
+          })
+          .catch(function () {
+            $("home-loading").hidden = true;
+            var cached = lsGet(LS_LIST);
+            if (cached && cached.length) {
+              renderList(cached, true);
+            } else {
+              $("home-error").hidden = false;
+            }
+          });
+      }
+      $("btn-retry-list").addEventListener("click", loadList);
+
+      /* ---------------- reader state ---------------- */
+      var article = null;         // full article row
+      var audioSegs = null;       // audio_segments rows or null
+      var showPinyin = true;
+      var showVi = false;         // Nghĩa starts hidden on every open
+      var showFull = false;
+      var selectedToken = null;
+
+      function tokenLists() {
+        var lists = [{ para: -1, tokens: (article && article.title_tokens) || [] }];
+        ((article && article.paragraphs) || []).forEach(function (p, i) {
+          lists.push({ para: i, tokens: p.tokens || [] });
+        });
+        return lists;
+      }
+
+      function renderTokens() {
+        if (!article) return;
+        var titleHost = $("r-title");
+        titleHost.innerHTML = "";
+        titleHost.appendChild(buildTokenSpan(article.title_tokens || [], "title-tokens", -1));
+        var host = $("r-paragraphs");
+        host.innerHTML = "";
+        (article.paragraphs || []).forEach(function (p, i) {
+          var para = el("p", "para");
+          para.appendChild(buildTokenSpan(p.tokens || [], "body-tokens", i));
+          host.appendChild(para);
+        });
+        updateSpeakingHighlight();
+      }
+
+      function buildTokenSpan(tokens, sizeCls, paraIdx) {
+        var span = el("span", "tokens " + sizeCls + (showVi ? " with-vi" : " no-vi"));
+        span.dataset.para = paraIdx;
+        tokens.forEach(function (t, i) {
+          if (!t.py) {
+            var punct = el("span", "tok-punct");
+            punct.dataset.idx = i;
+            if (showPinyin) punct.appendChild(el("span", "py py-spacer", "·"));
+            punct.appendChild(el("span", "hz font-zh", t.w));
+            span.appendChild(punct);
+            return;
+          }
+          var b = el("button", "tok");
+          b.type = "button";
+          b.dataset.idx = i;
+          b.setAttribute("aria-label", "Tra cụm từ " + t.w);
+          if (selectedToken && selectedToken.w === t.w) b.classList.add("active");
+          if (showPinyin) b.appendChild(el("span", "py", t.py));
+          b.appendChild(el("span", "hz font-zh", t.w));
+          if (showVi && t.vi) b.appendChild(el("span", "vi", t.vi));
+          b.addEventListener("click", function () { openSheet(t); });
+          span.appendChild(b);
+        });
+        return span;
+      }
+
+      /* toggles */
+      function syncToggles() {
+        $("toggle-pinyin").setAttribute("aria-pressed", showPinyin ? "true" : "false");
+        $("toggle-vi").setAttribute("aria-pressed", showVi ? "true" : "false");
+      }
+      $("toggle-pinyin").addEventListener("click", function () { showPinyin = !showPinyin; syncToggles(); renderTokens(); });
+      $("toggle-vi").addEventListener("click", function () { showVi = !showVi; syncToggles(); renderTokens(); });
+
+      /* full translation */
+      $("btn-full").addEventListener("click", function () {
+        showFull = !showFull;
+        $("btn-full").setAttribute("aria-expanded", showFull ? "true" : "false");
+        $("btn-full").textContent = showFull ? "Ẩn bản dịch toàn bài" : "Xem bản dịch toàn bài (tiếng Việt)";
+        $("r-translation").hidden = !showFull;
+      });
+      function renderTranslation() {
+        var host = $("r-translation");
+        host.innerHTML = "";
+        var tr = (article && article.translation_vi) || [];
+        if (!tr.length) {
+          host.appendChild(el("p", null, "Bài này chưa có bản dịch toàn bài."));
+          return;
+        }
+        if (article.translation_title_vi) host.appendChild(el("p", "t-title", article.translation_title_vi));
+        tr.forEach(function (p) { host.appendChild(el("p", null, p)); });
+      }
+
+      /* generation timing card */
+      var genOpen = false;
+      $("gen-head").addEventListener("click", function () {
+        genOpen = !genOpen;
+        $("gen-head").setAttribute("aria-expanded", genOpen ? "true" : "false");
+        $("gen-chev").classList.toggle("open", genOpen);
+        $("gen-body").hidden = !genOpen;
+      });
+      function renderGeneration() {
+        genOpen = false;
+        $("gen-head").setAttribute("aria-expanded", "false");
+        $("gen-chev").classList.remove("open");
+        $("gen-body").hidden = true;
+        var body = $("gen-body");
+        body.innerHTML = "";
+        var gen = article && article.generation;
+        var hasGen = gen && gen.startedAt && gen.finishedAt && gen.steps && gen.steps.length;
+        var totalMs = hasGen ? (gen.totalMs != null ? gen.totalMs : gen.finishedAt - gen.startedAt) : null;
+        $("gen-total").textContent = totalMs != null ? "Tổng " + formatDuration(totalMs) : "";
+        if (!hasGen) {
+          body.appendChild(el("p", "gen-empty",
+            "Bài này được tạo trước khi hệ thống bắt đầu ghi lại thời gian từng bước, nên chưa có chi tiết các bước. Bài được lưu lúc " +
+            formatDateTimeFull(article.created_at_ms) + "."));
+          return;
+        }
+        var dl = el("dl");
+        [["Bắt đầu tạo", formatDateTimeFull(gen.startedAt)],
+         ["Hoàn thành", formatDateTimeFull(gen.finishedAt)],
+         ["Tổng thời gian", formatDuration(totalMs)]].forEach(function (row) {
+          var div = el("div", "gen-row");
+          div.appendChild(el("dt", null, row[0]));
+          div.appendChild(el("dd", null, row[1]));
+          dl.appendChild(div);
+        });
+        body.appendChild(dl);
+        var ol = el("ol", "gen-steps");
+        gen.steps.forEach(function (s) {
+          var li = el("li");
+          var main = el("span", "s-main");
+          main.appendChild(el("span", "s-label", s.label + (s.key === "annotate" && s.count > 1 ? " (" + s.count + " câu)" : "")));
+          main.appendChild(el("span", "s-time", formatClock(s.startedAt) + " → " + formatClock(s.finishedAt)));
+          li.appendChild(main);
+          li.appendChild(el("span", "s-dur", formatDuration(s.durationMs)));
+          ol.appendChild(li);
+        });
+        body.appendChild(ol);
+      }
+
+      /* ---------------- word sheet ---------------- */
+      function openSheet(token) {
+        selectedToken = token;
+        renderTokens();
+        $("sheet-kind").textContent = [...token.w].length > 1 ? "Cụm từ" : "Từ đơn";
+        $("sheet-word").textContent = token.w;
+        $("sheet-py").textContent = token.py || "";
+        var hasGloss = !!(token.vi && token.vi.trim());
+        $("sheet-gloss").hidden = !hasGloss;
+        $("sheet-nogloss").hidden = hasGloss;
+        if (hasGloss) { $("sheet-vi").textContent = token.vi; $("sheet-hv").textContent = token.hv || ""; }
+        syncSheetSave();
+        $("sheet-root").hidden = false;
+      }
+      function syncSheetSave() {
+        if (!selectedToken) return;
+        var btn = $("sheet-save");
+        var saved = isSaved(selectedToken.w);
+        var hasGloss = !!(selectedToken.vi && selectedToken.vi.trim());
+        btn.disabled = !hasGloss;
+        btn.classList.toggle("saved", saved);
+        btn.textContent = saved ? "✓ Đã lưu — bấm để bỏ lưu" : "Lưu cụm từ này";
+      }
+      function closeSheet() {
+        $("sheet-root").hidden = true;
+        if (selectedToken) { selectedToken = null; if (article) renderTokens(); }
+      }
+      $("sheet-close").addEventListener("click", closeSheet);
+      $("sheet-backdrop").addEventListener("click", closeSheet);
+      $("sheet-save").addEventListener("click", function () {
+        if (!selectedToken) return;
+        if (isSaved(selectedToken.w)) removeWord(selectedToken.w);
+        else saveWord({ word: selectedToken.w, pinyin: selectedToken.py, vietnamese: selectedToken.vi, hanviet: selectedToken.hv });
+        syncSheetSave();
+        if (!views.saved.hidden) renderSaved();
+      });
+
+      /* ---------------- saved view ---------------- */
+      function renderSaved() {
+        renderSavedCounts();
+        var words = getSaved();
+        var ul = $("saved-list");
+        ul.innerHTML = "";
+        $("saved-empty").hidden = words.length > 0;
+        words.forEach(function (w) {
+          var li = el("li", "saved-item");
+          var main = el("div", "main");
+          var row = el("div", "w-row");
+          row.appendChild(el("span", "w font-zh", w.word));
+          row.appendChild(el("span", "p", w.pinyin || ""));
+          main.appendChild(row);
+          main.appendChild(el("div", "v", w.vietnamese || ""));
+          main.appendChild(el("div", "h", "Hán-Việt: " + (w.hanviet || "")));
+          li.appendChild(main);
+          var del = el("button", "saved-del", "×");
+          del.type = "button";
+          del.setAttribute("aria-label", "Xoá từ " + w.word + " khỏi danh sách đã lưu");
+          del.addEventListener("click", function () { removeWord(w.word); renderSaved(); });
+          li.appendChild(del);
+          ul.appendChild(li);
+        });
+      }
+
+      /* ---------------- speech: segments from tokens ---------------- */
+      var SENTENCE_END = /[。！？；…]$/;
+      function buildSegments() {
+        var segs = [];
+        tokenLists().forEach(function (list) {
+          var start = 0, text = "";
+          list.tokens.forEach(function (tok, i) {
+            if (text === "") start = i;
+            text += tok.w;
+            if (SENTENCE_END.test(tok.w.trim())) {
+              var t = text.trim();
+              if (t) segs.push({ text: t, para: list.para, start: start, end: i });
+              text = "";
+            }
+          });
+          var rest = text.trim();
+          if (rest) segs.push({ text: rest, para: list.para, start: start, end: list.tokens.length - 1 });
+        });
+        return segs;
+      }
+
+      /* ---------------- speech engine ----------------
+         Two modes:
+         - "mp3": segments have public_url (articles 7–24). All files are
+           joined into ONE blob track played through ONE <audio> element
+           with a single play() inside the tap (same approach as the
+           original webapp); highlight follows currentTime against the
+           stored start_ms/duration_ms. Falls back to per-file playback
+           if the join fails.
+         - "tts": no MP3s (articles 25–35). Device speechSynthesis zh-CN,
+           first utterance spoken synchronously inside the tap handler. */
+      var speech = {
+        mode: null,            // "mp3" | "tts" | null
+        status: "loading",     // loading | ready | playing | paused | error
+        segments: [],          // token-based segments for highlight (tts) — mp3 uses audioSegs mapping
+        segIdx: -1,
+        rate: 1,
+        audio: null,
+        trackUrl: null,
+        loadedSrc: null,
+        buildPromise: null,
+        wantPlay: false,
+        pendingSeg: 0,
+        ttsIdx: 0,
+        voiceName: null
+      };
+
+      function setSeg(idx) {
+        speech.segIdx = idx;
+        updateSpeakingHighlight();
+        updatePlayerUI();
+        if (idx >= 0) scrollSpeakingIntoView();
+      }
+      function updateSpeakingHighlight() {
+        var active = null;
+        if (speech.segIdx >= 0) {
+          if (speech.mode === "mp3" && audioSegs && audioSegs[speech.segIdx]) {
+            var s = audioSegs[speech.segIdx];
+            active = { para: s.para, start: s.token_start, end: s.token_end };
+          } else if (speech.segments[speech.segIdx]) {
+            active = speech.segments[speech.segIdx];
+          }
+        }
+        document.querySelectorAll("#view-reader .tokens").forEach(function (span) {
+          var para = parseInt(span.dataset.para, 10);
+          span.querySelectorAll("[data-idx]").forEach(function (node) {
+            var i = parseInt(node.dataset.idx, 10);
+            var on = !!active && active.para === para && i >= active.start && i <= active.end;
+            node.classList.toggle("speaking", on);
+          });
+        });
+      }
+      function scrollSpeakingIntoView() {
+        var node = document.querySelector("#view-reader .speaking");
+        if (!node) return;
+        var r = node.getBoundingClientRect();
+        if (r.top < 90 || r.bottom > window.innerHeight - 110) {
+          node.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }
+      function totalSegs() {
+        return speech.mode === "mp3" && audioSegs ? audioSegs.length : speech.segments.length;
+      }
+      function updatePlayerUI() {
+        var btn = $("btn-play");
+        var note = $("player-note");
+        btn.disabled = speech.status === "loading";
+        $("btn-stop").hidden = !(speech.status === "playing" || speech.status === "paused");
+        var label = "▶ Nghe đọc bài";
+        if (speech.status === "playing") label = "❚❚ Tạm dừng";
+        else if (speech.status === "paused") label = "▶ Đọc tiếp";
+        else if (speech.status === "loading") label = "Đang chuẩn bị…";
+        else if (speech.status === "error") label = "↻ Thử lại";
+        btn.textContent = label;
+        var msg = "";
+        if (speech.segIdx >= 0 && totalSegs() > 0) msg = "Đang đọc câu " + (speech.segIdx + 1) + "/" + totalSegs() + ".";
+        else if (speech.status === "loading") msg = "Đang chuẩn bị giọng đọc…";
+        else if (speech.status === "ready") msg = speech.mode === "mp3" ? "Giọng đọc đã sẵn sàng — bấm là nghe ngay." : "Bài này chưa có tệp ghi âm — sẽ đọc bằng giọng máy tiếng Trung trên thiết bị của bạn.";
+        else if (speech.status === "error") msg = "Chưa phát được giọng đọc cho bài này.";
+        else msg = "Đọc cả bài bằng tiếng Trung, câu đang đọc được tô sáng.";
+        if (speech.mode === "mp3" && speech.status !== "loading") msg += " Giọng: giọng ghi âm sẵn của bài.";
+        else if (speech.mode === "tts" && speech.status !== "loading") msg += " Giọng: giọng máy trên thiết bị (tiếng Trung).";
+        note.textContent = msg;
+        note.classList.toggle("warn", speech.status === "error");
+      }
+      document.querySelectorAll("#rates .rate-btn").forEach(function (b) {
+        b.addEventListener("click", function () {
+          speech.rate = parseFloat(b.dataset.rate);
+          document.querySelectorAll("#rates .rate-btn").forEach(function (x) {
+            x.setAttribute("aria-pressed", x === b ? "true" : "false");
+          });
+          if (speech.audio) speech.audio.playbackRate = speech.rate;
+        });
+      });
+
+      function ensureAudio() {
+        if (speech.audio) return speech.audio;
+        var a = new Audio();
+        a.preload = "auto";
+        a.onended = function () {
+          if (!speech.trackUrl && speech.segIdx >= 0) speech.pendingSeg = speech.segIdx + 1;
+          speech.status = "ready";
+          setSeg(-1);
+        };
+        a.ontimeupdate = function () {
+          if (!speech.trackUrl || !audioSegs) return;
+          var t = a.currentTime * 1000;
+          var idx = -1;
+          for (var i = 0; i < audioSegs.length; i++) {
+            var s = audioSegs[i];
+            if (t >= s.start_ms && t < s.start_ms + s.duration_ms) { idx = i; break; }
+          }
+          if (idx < 0 && audioSegs.length) {
+            var last = audioSegs[audioSegs.length - 1];
+            if (t >= last.start_ms) idx = audioSegs.length - 1;
+          }
+          if (idx !== speech.segIdx) setSeg(idx);
+        };
+        a.onerror = function () {
+          if (speech.loadedSrc) { speech.status = "error"; setSeg(-1); }
+        };
+        speech.audio = a;
+        return a;
+      }
+
+      function stripId3v2(buf) {
+        var b = new Uint8Array(buf);
+        if (b.length > 10 && b[0] === 0x49 && b[1] === 0x44 && b[2] === 0x33) {
+          var size = ((b[6] || 0) & 0x7f) * 0x200000 + ((b[7] || 0) & 0x7f) * 0x4000 + ((b[8] || 0) & 0x7f) * 0x80 + ((b[9] || 0) & 0x7f);
+          var total = 10 + size + ((b[5] || 0) & 0x10 ? 10 : 0);
+          if (total > 0 && total < b.length) return buf.slice(total);
+        }
+        return buf;
+      }
+      function buildTrack() {
+        if (speech.trackUrl) return Promise.resolve(true);
+        if (speech.buildPromise) return speech.buildPromise;
+        if (!audioSegs || !audioSegs.length || audioSegs.some(function (s) { return !s.public_url; })) return Promise.resolve(false);
+        var p = (async function () {
+          try {
+            var bufs = [];
+            for (var i = 0; i < audioSegs.length; i++) {
+              var res = await fetch(audioSegs[i].public_url);
+              if (!res.ok) return false;
+              bufs.push(stripId3v2(await res.arrayBuffer()));
+            }
+            speech.trackUrl = URL.createObjectURL(new Blob(bufs, { type: "audio/mpeg" }));
+            return true;
+          } catch (e) { return false; }
+          finally { speech.buildPromise = null; }
+        })();
+        speech.buildPromise = p;
+        return p;
+      }
+      function playTrack() {
+        if (!speech.trackUrl) return false;
+        speech.pendingSeg = 0;
+        var a = ensureAudio();
+        if (speech.loadedSrc !== speech.trackUrl) { a.src = speech.trackUrl; speech.loadedSrc = speech.trackUrl; }
+        a.playbackRate = speech.rate;
+        try { a.currentTime = 0; } catch (e) {}
+        speech.status = "playing";
+        setSeg(-1);
+        a.play().catch(function () { if (speech.segIdx < 0) { speech.status = "ready"; updatePlayerUI(); } });
+        return true;
+      }
+      function playOneSegment(i) {
+        var s = audioSegs && audioSegs[i];
+        if (!s || !s.public_url) return false;
+        var a = ensureAudio();
+        a.src = s.public_url;
+        speech.loadedSrc = s.public_url;
+        a.playbackRate = speech.rate;
+        speech.status = "playing";
+        setSeg(i);
+        a.play().catch(function () { speech.status = "ready"; updatePlayerUI(); });
+        return true;
+      }
+      function startMp3Playback() {
+        if (playTrack()) { speech.wantPlay = false; return; }
+        buildTrack().then(function (ok) {
+          if (!speech.wantPlay) return;
+          speech.wantPlay = false;
+          if (ok) { if (!playTrack()) playOneSegment(0); }
+          else playOneSegment(Math.min(speech.pendingSeg, (audioSegs || []).length - 1));
+        });
+      }
+
+      /* ---- TTS fallback ---- */
+      function ttsSpeakFrom(idx) {
+        if (!("speechSynthesis" in window)) { speech.status = "error"; updatePlayerUI(); return; }
+        speech.ttsIdx = idx;
+        var seg = speech.segments[idx];
+        if (!seg) { speech.status = "ready"; setSeg(-1); return; }
+        var u = new SpeechSynthesisUtterance(seg.text);
+        u.lang = "zh-CN";
+        u.rate = speech.rate;
+        var voices = speechSynthesis.getVoices();
+        var zh = voices.filter(function (v) { return /^zh/i.test(v.lang); })[0];
+        if (zh) u.voice = zh;
+        u.onend = function () {
+          if (speech.status !== "playing") return;
+          if (speech.ttsIdx + 1 < speech.segments.length) ttsSpeakFrom(speech.ttsIdx + 1);
+          else { speech.status = "ready"; setSeg(-1); }
+        };
+        u.onerror = function (e) {
+          if (e.error === "interrupted" || e.error === "canceled") return;
+          if (speech.status === "playing" && speech.ttsIdx + 1 < speech.segments.length) ttsSpeakFrom(speech.ttsIdx + 1);
+          else if (speech.status === "playing") { speech.status = "ready"; setSeg(-1); }
+        };
+        speech.status = "playing";
+        setSeg(idx);
+        speechSynthesis.speak(u);
+      }
+
+      $("btn-play").addEventListener("click", function () {
+        if (speech.status === "playing") {
+          if (speech.mode === "mp3") { speech.audio && speech.audio.pause(); }
+          else if ("speechSynthesis" in window) speechSynthesis.pause();
+          speech.status = "paused";
+          updatePlayerUI();
+          return;
+        }
+        if (speech.status === "paused") {
+          speech.status = "playing";
+          updatePlayerUI();
+          if (speech.mode === "mp3") { var a = ensureAudio(); a.play().catch(function () { speech.status = "ready"; updatePlayerUI(); }); }
+          else if ("speechSynthesis" in window) speechSynthesis.resume();
+          return;
+        }
+        // ready / error → start from the top, synchronously in this tap
+        if (speech.mode === "mp3") {
+          speech.wantPlay = true;
+          startMp3Playback();
+        } else if (speech.mode === "tts") {
+          if ("speechSynthesis" in window) speechSynthesis.cancel();
+          ttsSpeakFrom(0);
+        } else {
+          speech.status = "error"; updatePlayerUI();
+        }
+      });
+      $("btn-stop").addEventListener("click", stopSpeech);
+      function stopSpeech() {
+        speech.wantPlay = false;
+        speech.pendingSeg = 0;
+        if (speech.audio) {
+          speech.audio.pause();
+          try { speech.audio.currentTime = 0; } catch (e) {}
+        }
+        if ("speechSynthesis" in window) { try { speechSynthesis.cancel(); } catch (e) {} }
+        if (speech.status === "playing" || speech.status === "paused") speech.status = speech.mode ? "ready" : "loading";
+        speech.segIdx = -1;
+        updateSpeakingHighlight();
+        updatePlayerUI();
+      }
+      function resetSpeech() {
+        stopSpeech();
+        if (speech.trackUrl) { URL.revokeObjectURL(speech.trackUrl); speech.trackUrl = null; }
+        speech.buildPromise = null;
+        speech.loadedSrc = null;
+        speech.mode = null;
+        speech.status = "loading";
+        speech.segments = [];
+        speech.segIdx = -1;
+        if (speech.audio) { speech.audio.removeAttribute("src"); try { speech.audio.load(); } catch (e) {} }
+        updatePlayerUI();
+      }
+
+      /* ---------------- open article ---------------- */
+      var openToken = 0;
+      function openArticle(id) {
+        currentArticleId = id;
+        var my = ++openToken;
+        resetSpeech();
+        selectedToken = null;
+        showPinyin = true;
+        showVi = false;   // Nghĩa starts hidden on every open
+        showFull = false;
+        syncToggles();
+        $("btn-full").setAttribute("aria-expanded", "false");
+        $("btn-full").textContent = "Xem bản dịch toàn bài (tiếng Việt)";
+        $("r-translation").hidden = true;
+        $("reader-loading").hidden = false;
+        $("reader-error").hidden = true;
+        $("reader-body").hidden = true;
+
+        var cachedArticle = lsGet(LS_ARTICLE_PREFIX + id);
+        var cachedAudio = lsGet(LS_AUDIO_PREFIX + id);
+        var articlePromise = cachedArticle
+          ? Promise.resolve(cachedArticle)
+          : sbFetch("/rest/v1/articles?select=*&id=eq." + id).then(function (rows) {
+              if (!rows || !rows.length) throw new Error("not found");
+              lsSet(LS_ARTICLE_PREFIX + id, rows[0]);
+              return rows[0];
+            });
+        var audioPromise = cachedAudio
+          ? Promise.resolve(cachedAudio)
+          : sbFetch("/rest/v1/audio_segments?select=idx,para,token_start,token_end,text,public_url,duration_ms,start_ms&article_id=eq." + id + "&order=idx.asc")
+              .then(function (rows) { lsSet(LS_AUDIO_PREFIX + id, rows); return rows; })
+              .catch(function () { return null; });
+
+        Promise.all([articlePromise, audioPromise]).then(function (results) {
+          if (my !== openToken) return;
+          article = results[0];
+          audioSegs = results[1];
+          $("reader-loading").hidden = true;
+          $("reader-body").hidden = false;
+          $("r-category").textContent = article.category || "";
+          $("r-source").textContent = (article.source_name || "") + (article.source_pub_at ? " · " + formatPub(article.source_pub_at) : "");
+          $("r-source-name").textContent = article.source_name || "";
+          var link = $("r-source-link");
+          link.textContent = article.source_title || "";
+          link.href = article.source_url || "#";
+          renderTokens();
+          renderTranslation();
+          renderGeneration();
+          // speech setup
+          speech.segments = buildSegments();
+          var hasMp3 = !!(audioSegs && audioSegs.length && audioSegs.some(function (s) { return !!s.public_url; }));
+          speech.mode = hasMp3 ? "mp3" : "tts";
+          speech.status = "ready";
+          updatePlayerUI();
+          if (hasMp3) buildTrack(); // assemble in background so the tap is one play()
+        }).catch(function () {
+          if (my !== openToken) return;
+          $("reader-loading").hidden = true;
+          $("reader-error").hidden = false;
+        });
+        // Refresh the cached copy in the background when we served from cache,
+        // so edits/new glosses still arrive without blocking the open.
+        if (cachedArticle) {
+          sbFetch("/rest/v1/articles?select=*&id=eq." + id).then(function (rows) {
+            if (rows && rows.length) lsSet(LS_ARTICLE_PREFIX + id, rows[0]);
+          }).catch(function () {});
+        }
+      }
+      $("btn-retry-article").addEventListener("click", function () {
+        if (currentArticleId != null) { lsDel(LS_ARTICLE_PREFIX + currentArticleId); openArticle(currentArticleId); }
+      });
+
+      /* ---------------- nav buttons ---------------- */
+      $("btn-back").addEventListener("click", function () { location.hash = "#/"; });
+      $("btn-back-saved").addEventListener("click", function () { location.hash = "#/"; });
+      $("btn-saved-home").addEventListener("click", function () { location.hash = "#/saved"; });
+      $("btn-saved-reader").addEventListener("click", function () { location.hash = "#/saved"; });
+      document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeSheet(); });
+      if ("speechSynthesis" in window) { try { speechSynthesis.getVoices(); } catch (e) {} }
+
+      /* ---------------- boot ---------------- */
+      renderSavedCounts();
+      loadList();
+      route();
+    })();
+    </script>
+  </body>
+</html>
