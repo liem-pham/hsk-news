@@ -112,65 +112,30 @@
       .toggle-btn[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
 
       /* ---------- tokens ---------- */
-      .tokens { display: flex; flex-wrap: wrap; }
-      .tokens.with-vi { align-items: flex-start; row-gap: .5rem; }
-      .tokens.no-vi { align-items: flex-end; }
+      .tokens { display: flex; flex-wrap: wrap; align-items: flex-end; }
       .tok {
         display: flex; flex-direction: column; align-items: center;
         padding: 1px; border-radius: 4px; text-align: center;
         min-height: 0;
       }
-      .tok.speaking { background: var(--accent-soft); }
       .tok.active { background: var(--accent); color: #fff; }
       .tok .py { line-height: 1.25; color: var(--gold); font-weight: 500; }
       .tok.active .py { color: rgba(255,255,255,.85); }
       .tok .hz { color: var(--text); text-decoration: underline dotted; text-underline-offset: 5px; text-decoration-color: color-mix(in srgb, var(--dim) 45%, transparent); }
       .tok.active .hz { color: #fff; text-decoration-color: rgba(255,255,255,.6); }
-      .tok .vi { margin-top: 3px; line-height: 1.35; text-align: center; font-weight: 500; color: var(--dim); }
-      .tok.active .vi { color: rgba(255,255,255,.85); }
       .tok-punct { display: flex; flex-direction: column; align-items: center; border-radius: 4px; }
-      .tok-punct.speaking { background: var(--accent-soft); }
       .tok-punct .py-spacer { line-height: 1.25; visibility: hidden; }
       .title-tokens .hz { font-size: 29px; line-height: 1.45; font-weight: 700; }
       .title-tokens .py { font-size: 11px; }
-      .title-tokens .vi { font-size: 12px; max-width: 9rem; }
       .body-tokens .hz { font-size: 21px; line-height: 1.6; }
       .body-tokens .py { font-size: 10px; }
-      .body-tokens .vi { font-size: 11px; max-width: 7rem; }
       .para { margin: 0 0 1.15rem; }
 
-      /* ---------- player ---------- */
-      .player {
-        margin-top: 1rem; border: 1px solid var(--border); border-radius: var(--radius);
-        background: var(--surface); padding: .8rem .9rem;
-      }
-      .player-row { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
-      .play-btn {
-        padding: .6rem 1.2rem; border-radius: 999px; background: var(--accent); color: #fff;
-        font-size: 14px; font-weight: 600;
-      }
-      .play-btn:disabled { opacity: .6; }
-      .stop-btn {
-        padding: .6rem 1rem; border-radius: 999px; border: 1px solid var(--border);
-        color: var(--dim); font-size: 14px; font-weight: 600;
-      }
-      .rates { margin-left: auto; display: flex; gap: .35rem; }
-      .rate-btn {
-        padding: .4rem .6rem; border-radius: 999px; font-size: 12px; font-weight: 600;
-        border: 1px solid var(--border); color: var(--dim); min-height: 2rem;
-      }
-      .rate-btn[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
-      .player-note { margin: .55rem 0 0; font-size: 12px; line-height: 1.55; color: var(--dim); }
-      .player-note.warn { color: var(--accent); font-weight: 500; }
-
       /* ---------- sections under article ---------- */
-      .full-btn {
-        width: 100%; padding: .8rem; border-radius: var(--radius);
-        border: 1px solid var(--accent); color: var(--accent); font-weight: 600; font-size: 14px;
-      }
-      .translation { margin-top: 1rem; }
-      .translation .t-title { font-size: 17px; font-weight: 700; line-height: 1.45; margin: 0; }
-      .translation p { font-size: 15px; line-height: 1.7; margin: 0 0 1rem; }
+      .sent { margin: 0 0 .85rem; }
+      .sent:last-child { margin-bottom: 0; }
+      .sent-vi { margin-top: .35rem; font-size: 15px; line-height: 1.7; color: var(--dim); }
+      .title-vi { margin-top: .55rem; font-size: 17px; font-weight: 500; line-height: 1.5; color: var(--dim); }
       .section-divider { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); }
       .source-line { font-size: 12px; color: var(--dim); margin: 0 0 .3rem; }
       .source-link { font-size: 15px; text-decoration: underline; text-underline-offset: 2px; word-break: break-word; }
@@ -239,6 +204,15 @@
       }
       .view-title { font-size: 20px; font-weight: 700; margin: .8rem 0 0; }
       .empty-note { margin-top: 1.5rem; font-size: 14px; line-height: 1.65; color: var(--dim); }
+      /* ---------- iPad and wider: reading text 1.5x (iPhone sizes unchanged) ---------- */
+      @media (min-width: 768px) {
+        .body-tokens .hz { font-size: 31.5px; }
+        .body-tokens .py { font-size: 15px; }
+        .title-tokens .hz { font-size: 43.5px; }
+        .title-tokens .py { font-size: 16.5px; }
+        .sent-vi { font-size: 22.5px; }
+        .title-vi { font-size: 25.5px; }
+      }
       [hidden] { display: none !important; }
     </style>
   </head>
@@ -287,26 +261,9 @@
             <span id="r-source"></span>
           </div>
 
-          <div class="player">
-            <div class="player-row">
-              <button type="button" class="play-btn" id="btn-play" disabled>▶ Nghe đọc bài</button>
-              <button type="button" class="stop-btn" id="btn-stop" hidden>■ Dừng</button>
-              <span class="rates" id="rates">
-                <button type="button" class="rate-btn" data-rate="0.75" aria-pressed="false">0.75×</button>
-                <button type="button" class="rate-btn" data-rate="1" aria-pressed="true">1×</button>
-                <button type="button" class="rate-btn" data-rate="1.25" aria-pressed="false">1.25×</button>
-              </span>
-            </div>
-            <p class="player-note" id="player-note">Đang chuẩn bị giọng đọc…</p>
-          </div>
-
           <h1 style="margin:1rem 0 0"><span id="r-title"></span></h1>
+          <div class="title-vi" id="r-title-vi" hidden></div>
           <div id="r-paragraphs" style="margin-top:1.1rem"></div>
-
-          <div class="section-divider">
-            <button type="button" class="full-btn" id="btn-full" aria-expanded="false">Xem bản dịch toàn bài (tiếng Việt)</button>
-            <div class="translation" id="r-translation" hidden></div>
-          </div>
 
           <div class="section-divider">
             <p class="source-line">Bài gốc trên <span id="r-source-name"></span>:</p>
@@ -371,7 +328,6 @@
       var LS_SAVED = "docbao_public_saved_words_v1";
       var LS_LIST = "docbao_public_list_v1";
       var LS_ARTICLE_PREFIX = "docbao_public_article_";
-      var LS_AUDIO_PREFIX = "docbao_public_audio_";
 
       function $(id) { return document.getElementById(id); }
       function el(tag, cls, text) {
@@ -457,7 +413,6 @@
       function route() {
         var hash = location.hash || "#/";
         var m = hash.match(/^#\/article\/(\d+)$/);
-        stopSpeech();
         closeSheet();
         if (m) {
           showView("reader");
@@ -519,10 +474,8 @@
 
       /* ---------------- reader state ---------------- */
       var article = null;         // full article row
-      var audioSegs = null;       // audio_segments rows or null
       var showPinyin = true;
       var showVi = false;         // Nghĩa starts hidden on every open
-      var showFull = false;
       var selectedToken = null;
 
       function tokenLists() {
@@ -533,28 +486,52 @@
         return lists;
       }
 
+      var SENTENCE_END = /[。！？；…]$/;
+      function splitSentences(tokens) {
+        var out = [];
+        var cur = [];
+        (tokens || []).forEach(function (t) {
+          cur.push(t);
+          if (SENTENCE_END.test((t.w || "").trim())) { out.push(cur); cur = []; }
+        });
+        if (cur.length) out.push(cur);
+        return out;
+      }
+
       function renderTokens() {
         if (!article) return;
         var titleHost = $("r-title");
         titleHost.innerHTML = "";
-        titleHost.appendChild(buildTokenSpan(article.title_tokens || [], "title-tokens", -1));
+        titleHost.appendChild(buildTokenSpan(article.title_tokens || [], "title-tokens", -1, 0));
+        var titleVi = $("r-title-vi");
+        titleVi.hidden = !(showVi && article.translation_title_vi);
+        titleVi.textContent = article.translation_title_vi || "";
         var host = $("r-paragraphs");
         host.innerHTML = "";
         (article.paragraphs || []).forEach(function (p, i) {
-          var para = el("p", "para");
-          para.appendChild(buildTokenSpan(p.tokens || [], "body-tokens", i));
+          var para = el("div", "para");
+          var offset = 0;
+          splitSentences(p.tokens || []).forEach(function (sentTokens, k) {
+            var sent = el("div", "sent");
+            sent.appendChild(buildTokenSpan(sentTokens, "body-tokens", i, offset));
+            offset += sentTokens.length;
+            if (showVi && p.sent_vi && p.sent_vi[k]) {
+              sent.appendChild(el("div", "sent-vi", p.sent_vi[k]));
+            }
+            para.appendChild(sent);
+          });
           host.appendChild(para);
         });
-        updateSpeakingHighlight();
       }
 
-      function buildTokenSpan(tokens, sizeCls, paraIdx) {
-        var span = el("span", "tokens " + sizeCls + (showVi ? " with-vi" : " no-vi"));
+      function buildTokenSpan(tokens, sizeCls, paraIdx, idxOffset) {
+        var span = el("span", "tokens " + sizeCls);
         span.dataset.para = paraIdx;
         tokens.forEach(function (t, i) {
+          var gi = i + (idxOffset || 0);
           if (!t.py) {
             var punct = el("span", "tok-punct");
-            punct.dataset.idx = i;
+            punct.dataset.idx = gi;
             if (showPinyin) punct.appendChild(el("span", "py py-spacer", "·"));
             punct.appendChild(el("span", "hz font-zh", t.w));
             span.appendChild(punct);
@@ -562,12 +539,11 @@
           }
           var b = el("button", "tok");
           b.type = "button";
-          b.dataset.idx = i;
+          b.dataset.idx = gi;
           b.setAttribute("aria-label", "Tra cụm từ " + t.w);
           if (selectedToken && selectedToken.w === t.w) b.classList.add("active");
           if (showPinyin) b.appendChild(el("span", "py", t.py));
           b.appendChild(el("span", "hz font-zh", t.w));
-          if (showVi && t.vi) b.appendChild(el("span", "vi", t.vi));
           b.addEventListener("click", function () { openSheet(t); });
           span.appendChild(b);
         });
@@ -581,25 +557,6 @@
       }
       $("toggle-pinyin").addEventListener("click", function () { showPinyin = !showPinyin; syncToggles(); renderTokens(); });
       $("toggle-vi").addEventListener("click", function () { showVi = !showVi; syncToggles(); renderTokens(); });
-
-      /* full translation */
-      $("btn-full").addEventListener("click", function () {
-        showFull = !showFull;
-        $("btn-full").setAttribute("aria-expanded", showFull ? "true" : "false");
-        $("btn-full").textContent = showFull ? "Ẩn bản dịch toàn bài" : "Xem bản dịch toàn bài (tiếng Việt)";
-        $("r-translation").hidden = !showFull;
-      });
-      function renderTranslation() {
-        var host = $("r-translation");
-        host.innerHTML = "";
-        var tr = (article && article.translation_vi) || [];
-        if (!tr.length) {
-          host.appendChild(el("p", null, "Bài này chưa có bản dịch toàn bài."));
-          return;
-        }
-        if (article.translation_title_vi) host.appendChild(el("p", "t-title", article.translation_title_vi));
-        tr.forEach(function (p) { host.appendChild(el("p", null, p)); });
-      }
 
       /* generation timing card */
       var genOpen = false;
@@ -712,314 +669,20 @@
         });
       }
 
-      /* ---------------- speech: segments from tokens ---------------- */
-      var SENTENCE_END = /[。！？；…]$/;
-      function buildSegments() {
-        var segs = [];
-        tokenLists().forEach(function (list) {
-          var start = 0, text = "";
-          list.tokens.forEach(function (tok, i) {
-            if (text === "") start = i;
-            text += tok.w;
-            if (SENTENCE_END.test(tok.w.trim())) {
-              var t = text.trim();
-              if (t) segs.push({ text: t, para: list.para, start: start, end: i });
-              text = "";
-            }
-          });
-          var rest = text.trim();
-          if (rest) segs.push({ text: rest, para: list.para, start: start, end: list.tokens.length - 1 });
-        });
-        return segs;
-      }
-
-      /* ---------------- speech engine ----------------
-         Two modes:
-         - "mp3": segments have public_url (articles 7–24). All files are
-           joined into ONE blob track played through ONE <audio> element
-           with a single play() inside the tap (same approach as the
-           original webapp); highlight follows currentTime against the
-           stored start_ms/duration_ms. Falls back to per-file playback
-           if the join fails.
-         - "tts": no MP3s (articles 25–35). Device speechSynthesis zh-CN,
-           first utterance spoken synchronously inside the tap handler. */
-      var speech = {
-        mode: null,            // "mp3" | "tts" | null
-        status: "loading",     // loading | ready | playing | paused | error
-        segments: [],          // token-based segments for highlight (tts) — mp3 uses audioSegs mapping
-        segIdx: -1,
-        rate: 1,
-        audio: null,
-        trackUrl: null,
-        loadedSrc: null,
-        buildPromise: null,
-        wantPlay: false,
-        pendingSeg: 0,
-        ttsIdx: 0,
-        voiceName: null
-      };
-
-      function setSeg(idx) {
-        speech.segIdx = idx;
-        updateSpeakingHighlight();
-        updatePlayerUI();
-        if (idx >= 0) scrollSpeakingIntoView();
-      }
-      function updateSpeakingHighlight() {
-        var active = null;
-        if (speech.segIdx >= 0) {
-          if (speech.mode === "mp3" && audioSegs && audioSegs[speech.segIdx]) {
-            var s = audioSegs[speech.segIdx];
-            active = { para: s.para, start: s.token_start, end: s.token_end };
-          } else if (speech.segments[speech.segIdx]) {
-            active = speech.segments[speech.segIdx];
-          }
-        }
-        document.querySelectorAll("#view-reader .tokens").forEach(function (span) {
-          var para = parseInt(span.dataset.para, 10);
-          span.querySelectorAll("[data-idx]").forEach(function (node) {
-            var i = parseInt(node.dataset.idx, 10);
-            var on = !!active && active.para === para && i >= active.start && i <= active.end;
-            node.classList.toggle("speaking", on);
-          });
-        });
-      }
-      function scrollSpeakingIntoView() {
-        var node = document.querySelector("#view-reader .speaking");
-        if (!node) return;
-        var r = node.getBoundingClientRect();
-        if (r.top < 90 || r.bottom > window.innerHeight - 110) {
-          node.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-      }
-      function totalSegs() {
-        return speech.mode === "mp3" && audioSegs ? audioSegs.length : speech.segments.length;
-      }
-      function updatePlayerUI() {
-        var btn = $("btn-play");
-        var note = $("player-note");
-        btn.disabled = speech.status === "loading";
-        $("btn-stop").hidden = !(speech.status === "playing" || speech.status === "paused");
-        var label = "▶ Nghe đọc bài";
-        if (speech.status === "playing") label = "❚❚ Tạm dừng";
-        else if (speech.status === "paused") label = "▶ Đọc tiếp";
-        else if (speech.status === "loading") label = "Đang chuẩn bị…";
-        else if (speech.status === "error") label = "↻ Thử lại";
-        btn.textContent = label;
-        var msg = "";
-        if (speech.segIdx >= 0 && totalSegs() > 0) msg = "Đang đọc câu " + (speech.segIdx + 1) + "/" + totalSegs() + ".";
-        else if (speech.status === "loading") msg = "Đang chuẩn bị giọng đọc…";
-        else if (speech.status === "ready") msg = speech.mode === "mp3" ? "Giọng đọc đã sẵn sàng — bấm là nghe ngay." : "Bài này chưa có tệp ghi âm — sẽ đọc bằng giọng máy tiếng Trung trên thiết bị của bạn.";
-        else if (speech.status === "error") msg = "Chưa phát được giọng đọc cho bài này.";
-        else msg = "Đọc cả bài bằng tiếng Trung, câu đang đọc được tô sáng.";
-        if (speech.mode === "mp3" && speech.status !== "loading") msg += " Giọng: giọng ghi âm sẵn của bài.";
-        else if (speech.mode === "tts" && speech.status !== "loading") msg += " Giọng: giọng máy trên thiết bị (tiếng Trung).";
-        note.textContent = msg;
-        note.classList.toggle("warn", speech.status === "error");
-      }
-      document.querySelectorAll("#rates .rate-btn").forEach(function (b) {
-        b.addEventListener("click", function () {
-          speech.rate = parseFloat(b.dataset.rate);
-          document.querySelectorAll("#rates .rate-btn").forEach(function (x) {
-            x.setAttribute("aria-pressed", x === b ? "true" : "false");
-          });
-          if (speech.audio) speech.audio.playbackRate = speech.rate;
-        });
-      });
-
-      function ensureAudio() {
-        if (speech.audio) return speech.audio;
-        var a = new Audio();
-        a.preload = "auto";
-        a.onended = function () {
-          if (!speech.trackUrl && speech.segIdx >= 0) speech.pendingSeg = speech.segIdx + 1;
-          speech.status = "ready";
-          setSeg(-1);
-        };
-        a.ontimeupdate = function () {
-          if (!speech.trackUrl || !audioSegs) return;
-          var t = a.currentTime * 1000;
-          var idx = -1;
-          for (var i = 0; i < audioSegs.length; i++) {
-            var s = audioSegs[i];
-            if (t >= s.start_ms && t < s.start_ms + s.duration_ms) { idx = i; break; }
-          }
-          if (idx < 0 && audioSegs.length) {
-            var last = audioSegs[audioSegs.length - 1];
-            if (t >= last.start_ms) idx = audioSegs.length - 1;
-          }
-          if (idx !== speech.segIdx) setSeg(idx);
-        };
-        a.onerror = function () {
-          if (speech.loadedSrc) { speech.status = "error"; setSeg(-1); }
-        };
-        speech.audio = a;
-        return a;
-      }
-
-      function stripId3v2(buf) {
-        var b = new Uint8Array(buf);
-        if (b.length > 10 && b[0] === 0x49 && b[1] === 0x44 && b[2] === 0x33) {
-          var size = ((b[6] || 0) & 0x7f) * 0x200000 + ((b[7] || 0) & 0x7f) * 0x4000 + ((b[8] || 0) & 0x7f) * 0x80 + ((b[9] || 0) & 0x7f);
-          var total = 10 + size + ((b[5] || 0) & 0x10 ? 10 : 0);
-          if (total > 0 && total < b.length) return buf.slice(total);
-        }
-        return buf;
-      }
-      function buildTrack() {
-        if (speech.trackUrl) return Promise.resolve(true);
-        if (speech.buildPromise) return speech.buildPromise;
-        if (!audioSegs || !audioSegs.length || audioSegs.some(function (s) { return !s.public_url; })) return Promise.resolve(false);
-        var p = (async function () {
-          try {
-            var bufs = [];
-            for (var i = 0; i < audioSegs.length; i++) {
-              var res = await fetch(audioSegs[i].public_url);
-              if (!res.ok) return false;
-              bufs.push(stripId3v2(await res.arrayBuffer()));
-            }
-            speech.trackUrl = URL.createObjectURL(new Blob(bufs, { type: "audio/mpeg" }));
-            return true;
-          } catch (e) { return false; }
-          finally { speech.buildPromise = null; }
-        })();
-        speech.buildPromise = p;
-        return p;
-      }
-      function playTrack() {
-        if (!speech.trackUrl) return false;
-        speech.pendingSeg = 0;
-        var a = ensureAudio();
-        if (speech.loadedSrc !== speech.trackUrl) { a.src = speech.trackUrl; speech.loadedSrc = speech.trackUrl; }
-        a.playbackRate = speech.rate;
-        try { a.currentTime = 0; } catch (e) {}
-        speech.status = "playing";
-        setSeg(-1);
-        a.play().catch(function () { if (speech.segIdx < 0) { speech.status = "ready"; updatePlayerUI(); } });
-        return true;
-      }
-      function playOneSegment(i) {
-        var s = audioSegs && audioSegs[i];
-        if (!s || !s.public_url) return false;
-        var a = ensureAudio();
-        a.src = s.public_url;
-        speech.loadedSrc = s.public_url;
-        a.playbackRate = speech.rate;
-        speech.status = "playing";
-        setSeg(i);
-        a.play().catch(function () { speech.status = "ready"; updatePlayerUI(); });
-        return true;
-      }
-      function startMp3Playback() {
-        if (playTrack()) { speech.wantPlay = false; return; }
-        buildTrack().then(function (ok) {
-          if (!speech.wantPlay) return;
-          speech.wantPlay = false;
-          if (ok) { if (!playTrack()) playOneSegment(0); }
-          else playOneSegment(Math.min(speech.pendingSeg, (audioSegs || []).length - 1));
-        });
-      }
-
-      /* ---- TTS fallback ---- */
-      function ttsSpeakFrom(idx) {
-        if (!("speechSynthesis" in window)) { speech.status = "error"; updatePlayerUI(); return; }
-        speech.ttsIdx = idx;
-        var seg = speech.segments[idx];
-        if (!seg) { speech.status = "ready"; setSeg(-1); return; }
-        var u = new SpeechSynthesisUtterance(seg.text);
-        u.lang = "zh-CN";
-        u.rate = speech.rate;
-        var voices = speechSynthesis.getVoices();
-        var zh = voices.filter(function (v) { return /^zh/i.test(v.lang); })[0];
-        if (zh) u.voice = zh;
-        u.onend = function () {
-          if (speech.status !== "playing") return;
-          if (speech.ttsIdx + 1 < speech.segments.length) ttsSpeakFrom(speech.ttsIdx + 1);
-          else { speech.status = "ready"; setSeg(-1); }
-        };
-        u.onerror = function (e) {
-          if (e.error === "interrupted" || e.error === "canceled") return;
-          if (speech.status === "playing" && speech.ttsIdx + 1 < speech.segments.length) ttsSpeakFrom(speech.ttsIdx + 1);
-          else if (speech.status === "playing") { speech.status = "ready"; setSeg(-1); }
-        };
-        speech.status = "playing";
-        setSeg(idx);
-        speechSynthesis.speak(u);
-      }
-
-      $("btn-play").addEventListener("click", function () {
-        if (speech.status === "playing") {
-          if (speech.mode === "mp3") { speech.audio && speech.audio.pause(); }
-          else if ("speechSynthesis" in window) speechSynthesis.pause();
-          speech.status = "paused";
-          updatePlayerUI();
-          return;
-        }
-        if (speech.status === "paused") {
-          speech.status = "playing";
-          updatePlayerUI();
-          if (speech.mode === "mp3") { var a = ensureAudio(); a.play().catch(function () { speech.status = "ready"; updatePlayerUI(); }); }
-          else if ("speechSynthesis" in window) speechSynthesis.resume();
-          return;
-        }
-        // ready / error → start from the top, synchronously in this tap
-        if (speech.mode === "mp3") {
-          speech.wantPlay = true;
-          startMp3Playback();
-        } else if (speech.mode === "tts") {
-          if ("speechSynthesis" in window) speechSynthesis.cancel();
-          ttsSpeakFrom(0);
-        } else {
-          speech.status = "error"; updatePlayerUI();
-        }
-      });
-      $("btn-stop").addEventListener("click", stopSpeech);
-      function stopSpeech() {
-        speech.wantPlay = false;
-        speech.pendingSeg = 0;
-        if (speech.audio) {
-          speech.audio.pause();
-          try { speech.audio.currentTime = 0; } catch (e) {}
-        }
-        if ("speechSynthesis" in window) { try { speechSynthesis.cancel(); } catch (e) {} }
-        if (speech.status === "playing" || speech.status === "paused") speech.status = speech.mode ? "ready" : "loading";
-        speech.segIdx = -1;
-        updateSpeakingHighlight();
-        updatePlayerUI();
-      }
-      function resetSpeech() {
-        stopSpeech();
-        if (speech.trackUrl) { URL.revokeObjectURL(speech.trackUrl); speech.trackUrl = null; }
-        speech.buildPromise = null;
-        speech.loadedSrc = null;
-        speech.mode = null;
-        speech.status = "loading";
-        speech.segments = [];
-        speech.segIdx = -1;
-        if (speech.audio) { speech.audio.removeAttribute("src"); try { speech.audio.load(); } catch (e) {} }
-        updatePlayerUI();
-      }
-
       /* ---------------- open article ---------------- */
       var openToken = 0;
       function openArticle(id) {
         currentArticleId = id;
         var my = ++openToken;
-        resetSpeech();
         selectedToken = null;
         showPinyin = true;
         showVi = false;   // Nghĩa starts hidden on every open
-        showFull = false;
         syncToggles();
-        $("btn-full").setAttribute("aria-expanded", "false");
-        $("btn-full").textContent = "Xem bản dịch toàn bài (tiếng Việt)";
-        $("r-translation").hidden = true;
         $("reader-loading").hidden = false;
         $("reader-error").hidden = true;
         $("reader-body").hidden = true;
 
         var cachedArticle = lsGet(LS_ARTICLE_PREFIX + id);
-        var cachedAudio = lsGet(LS_AUDIO_PREFIX + id);
         var articlePromise = cachedArticle
           ? Promise.resolve(cachedArticle)
           : sbFetch("/rest/v1/articles?select=*&id=eq." + id).then(function (rows) {
@@ -1027,16 +690,9 @@
               lsSet(LS_ARTICLE_PREFIX + id, rows[0]);
               return rows[0];
             });
-        var audioPromise = cachedAudio
-          ? Promise.resolve(cachedAudio)
-          : sbFetch("/rest/v1/audio_segments?select=idx,para,token_start,token_end,text,public_url,duration_ms,start_ms&article_id=eq." + id + "&order=idx.asc")
-              .then(function (rows) { lsSet(LS_AUDIO_PREFIX + id, rows); return rows; })
-              .catch(function () { return null; });
-
-        Promise.all([articlePromise, audioPromise]).then(function (results) {
+        articlePromise.then(function (row) {
           if (my !== openToken) return;
-          article = results[0];
-          audioSegs = results[1];
+          article = row;
           $("reader-loading").hidden = true;
           $("reader-body").hidden = false;
           $("r-category").textContent = article.category || "";
@@ -1046,15 +702,7 @@
           link.textContent = article.source_title || "";
           link.href = article.source_url || "#";
           renderTokens();
-          renderTranslation();
           renderGeneration();
-          // speech setup
-          speech.segments = buildSegments();
-          var hasMp3 = !!(audioSegs && audioSegs.length && audioSegs.some(function (s) { return !!s.public_url; }));
-          speech.mode = hasMp3 ? "mp3" : "tts";
-          speech.status = "ready";
-          updatePlayerUI();
-          if (hasMp3) buildTrack(); // assemble in background so the tap is one play()
         }).catch(function () {
           if (my !== openToken) return;
           $("reader-loading").hidden = true;
@@ -1078,7 +726,6 @@
       $("btn-saved-home").addEventListener("click", function () { location.hash = "#/saved"; });
       $("btn-saved-reader").addEventListener("click", function () { location.hash = "#/saved"; });
       document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeSheet(); });
-      if ("speechSynthesis" in window) { try { speechSynthesis.getVoices(); } catch (e) {} }
 
       /* ---------------- boot ---------------- */
       renderSavedCounts();
